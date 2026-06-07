@@ -12,8 +12,8 @@ require_once 'includes/header.php';
         <li class="breadcrumb-item active text-white-50">About</li>
       </ol>
     </nav>
-    <h1 class="text-white fw-bold">About Getas Reality</h1>
-    <p style="color:rgba(255,255,255,0.7);margin:0">Ethiopia's trusted partner for premium apartment sales.</p>
+    <h1 class="text-white fw-bold">About Getas Real Estate</h1>
+    <p style="color:rgba(255,255,255,0.7);margin:0">Addis Ababa's trusted partner for premium City Gate apartments.</p>
   </div>
 </div>
 
@@ -25,19 +25,25 @@ require_once 'includes/header.php';
         <div class="section-label">Our Story</div>
         <h2 class="section-title">Building Dreams in Addis Ababa</h2>
         <p class="text-muted"><?= htmlspecialchars($settings['about_short'] ?? '') ?></p>
-        <p class="text-muted">With flagship developments at <strong>Summit 72</strong> in Bole and <strong>Kazanchis</strong> in the heart of the business district, we offer premium 1, 2 and 3 bedroom apartments designed for modern Ethiopian living.</p>
-        <p class="text-muted">Every unit features international-grade finishes, full amenities, clear title deeds and dedicated after-sale support — because buying a home should be a joyful experience.</p>
+        <p class="text-muted">Our flagship development — <strong>City Gate</strong> — comprises three iconic towers (Wing 1, Wing 2 and Wing 3) in the heart of Addis Ababa, offering premium 2 and 3 bedroom apartments designed for modern Ethiopian living.</p>
+        <p class="text-muted">Every City Gate unit features dual balconies, maid's room, laundry room, dedicated parking, and international-grade finishes — all backed by a flexible 10% down payment entry plan.</p>
         <div class="row g-3 mt-2">
-          <div class="col-6">
+          <div class="col-4">
             <div class="d-flex align-items-center gap-2">
               <div class="feature-icon" style="width:44px;height:44px;border-radius:10px"><i class="bi bi-buildings" style="font-size:1.1rem"></i></div>
-              <div><div class="fw-700" style="font-size:1.3rem;color:var(--dark)">12</div><div class="small text-muted">Units Available</div></div>
+              <div><div class="fw-700" style="font-size:1.3rem;color:var(--dark)">3</div><div class="small text-muted">Towers</div></div>
             </div>
           </div>
-          <div class="col-6">
+          <div class="col-4">
             <div class="d-flex align-items-center gap-2">
-              <div class="feature-icon" style="width:44px;height:44px;border-radius:10px"><i class="bi bi-geo-alt" style="font-size:1.1rem"></i></div>
-              <div><div class="fw-700" style="font-size:1.3rem;color:var(--dark)">2</div><div class="small text-muted">Prime Sites</div></div>
+              <div class="feature-icon" style="width:44px;height:44px;border-radius:10px"><i class="bi bi-grid-3x3-gap" style="font-size:1.1rem"></i></div>
+              <div><div class="fw-700" style="font-size:1.3rem;color:var(--dark)">18</div><div class="small text-muted">Unit Types</div></div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="d-flex align-items-center gap-2">
+              <div class="feature-icon" style="width:44px;height:44px;border-radius:10px"><i class="bi bi-percent" style="font-size:1.1rem"></i></div>
+              <div><div class="fw-700" style="font-size:1.3rem;color:var(--dark)">10%</div><div class="small text-muted">To Reserve</div></div>
             </div>
           </div>
         </div>
@@ -45,10 +51,10 @@ require_once 'includes/header.php';
       <div class="col-lg-6">
         <div class="row g-3">
           <div class="col-6">
-            <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600" alt="Summit 72" class="img-fluid rounded-xl shadow-soft" style="height:220px;object-fit:cover;width:100%">
+            <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600" alt="City Gate 1" class="img-fluid rounded-xl shadow-soft" style="height:220px;object-fit:cover;width:100%">
           </div>
           <div class="col-6">
-            <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600" alt="Kazanchis" class="img-fluid rounded-xl shadow-soft" style="height:220px;object-fit:cover;width:100%">
+            <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600" alt="City Gate 2" class="img-fluid rounded-xl shadow-soft" style="height:220px;object-fit:cover;width:100%">
           </div>
           <div class="col-12">
             <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800" alt="Interior" class="img-fluid rounded-xl shadow-soft" style="height:200px;object-fit:cover;width:100%">
@@ -94,8 +100,8 @@ require_once 'includes/header.php';
   <div class="container position-relative" style="z-index:1">
     <div class="row align-items-center g-4">
       <div class="col-lg-7">
-        <h2 class="section-title text-white">Ready to Find Your Apartment?</h2>
-        <p style="color:rgba(255,255,255,0.7)">Browse our available units at Summit 72 and Kazanchis, or book a free site visit today.</p>
+        <h2 class="section-title text-white">Ready to Find Your City Gate Apartment?</h2>
+        <p style="color:rgba(255,255,255,0.7)">Browse available units across City Gate 1, 2 and 3, or book a free site visit today.</p>
       </div>
       <div class="col-lg-5 text-lg-end">
         <a href="properties.php" class="btn btn-gold btn-lg me-3">View Apartments</a>

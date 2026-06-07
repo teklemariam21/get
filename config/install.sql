@@ -1,157 +1,287 @@
--- Getas Reality Database Setup
+-- Getas Real Estate — City Gate Database
+-- Complete rebuild with real project data
+
 CREATE DATABASE IF NOT EXISTS getas_realty CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE getas_realty;
 
--- Users table
-CREATE TABLE IF NOT EXISTS users (
+DROP TABLE IF EXISTS inquiries;
+DROP TABLE IF EXISTS properties;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS testimonials;
+DROP TABLE IF EXISTS settings;
+DROP TABLE IF EXISTS payment_plans;
+
+-- Users
+CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     role ENUM('admin','agent','user') DEFAULT 'user',
     phone VARCHAR(20),
-    avatar VARCHAR(255),
     status ENUM('active','inactive') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Properties table
-CREATE TABLE IF NOT EXISTS properties (
+-- Properties
+CREATE TABLE properties (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    slug VARCHAR(200) UNIQUE NOT NULL,
-    description TEXT NOT NULL,
-    site ENUM('Summit 72','Kazanchis','Other') NOT NULL DEFAULT 'Summit 72',
-    type ENUM('1BR','2BR','3BR') NOT NULL,
+    title VARCHAR(250) NOT NULL,
+    slug VARCHAR(250) UNIQUE NOT NULL,
+    description TEXT,
+    tower ENUM('City Gate 1','City Gate 2','City Gate 3') NOT NULL,
+    unit_type VARCHAR(10) NOT NULL COMMENT 'Type 1..6',
     bedrooms TINYINT NOT NULL,
-    bathrooms TINYINT DEFAULT 1,
-    area DECIMAL(8,2) NOT NULL COMMENT 'Square meters',
-    floor_number TINYINT,
-    total_floors TINYINT,
-    price DECIMAL(15,2) NOT NULL,
-    price_type ENUM('sale','rent') DEFAULT 'sale',
-    currency ENUM('ETB','USD') DEFAULT 'ETB',
-    status ENUM('available','sold','reserved','coming_soon') DEFAULT 'available',
+    bathrooms TINYINT DEFAULT 2,
+    area DECIMAL(8,2) NOT NULL,
+    price_per_m2 DECIMAL(12,2) DEFAULT 0,
+    total_price DECIMAL(15,2) NOT NULL,
+    down_payment_10pct DECIMAL(15,2) DEFAULT 0 COMMENT '10% Down – pre-completion',
+    status ENUM('available','sold','reserved') DEFAULT 'available',
     featured TINYINT(1) DEFAULT 0,
-    image_main VARCHAR(255),
-    images TEXT COMMENT 'JSON array of image paths',
+    balcony TINYINT(1) DEFAULT 1,
+    maids_room TINYINT(1) DEFAULT 1,
+    laundry TINYINT(1) DEFAULT 1,
+    parking TINYINT(1) DEFAULT 1,
+    floor_plan_img VARCHAR(255) COMMENT 'Floor plan image path',
+    images TEXT COMMENT 'JSON array',
     amenities TEXT COMMENT 'JSON array',
-    parking TINYINT DEFAULT 0,
-    balcony TINYINT(1) DEFAULT 0,
-    furnished TINYINT(1) DEFAULT 0,
-    year_built YEAR,
     views INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Inquiries table
-CREATE TABLE IF NOT EXISTS inquiries (
+-- Payment plans (completion-based pricing)
+CREATE TABLE payment_plans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    plan_name VARCHAR(100) NOT NULL,
+    completion_pct INT NOT NULL COMMENT 'e.g. 85 or 100',
+    down_payment_pct INT NOT NULL COMMENT 'e.g. 10, 25, 50, 65',
+    bedrooms TINYINT NOT NULL,
+    area DECIMAL(8,2) NOT NULL,
+    price_per_m2 DECIMAL(12,2),
+    total_price DECIMAL(15,2) NOT NULL,
+    down_payment_amount DECIMAL(15,2) NOT NULL,
+    sort_order INT DEFAULT 0
+);
+
+-- Inquiries
+CREATE TABLE inquiries (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     message TEXT NOT NULL,
     property_id INT,
+    tower VARCHAR(50),
     status ENUM('new','read','replied','closed') DEFAULT 'new',
     ip_address VARCHAR(45),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL
 );
 
--- Testimonials table
-CREATE TABLE IF NOT EXISTS testimonials (
+-- Testimonials
+CREATE TABLE testimonials (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    role VARCHAR(100),
+    role VARCHAR(150),
     message TEXT NOT NULL,
     rating TINYINT DEFAULT 5,
     approved TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Blog posts table
-CREATE TABLE IF NOT EXISTS blog_posts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    slug VARCHAR(200) UNIQUE NOT NULL,
-    excerpt TEXT,
-    content LONGTEXT NOT NULL,
-    image VARCHAR(255),
-    author_id INT,
-    published TINYINT(1) DEFAULT 0,
-    views INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL
-);
-
--- Settings table
-CREATE TABLE IF NOT EXISTS settings (
+-- Settings
+CREATE TABLE settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     setting_key VARCHAR(100) UNIQUE NOT NULL,
     setting_value TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- =====================================================
--- SEED DATA
--- =====================================================
+-- ============================================================
+-- SEED: ADMIN USERS
+-- ============================================================
+-- password: password
+INSERT INTO users (name, email, password, role, phone) VALUES
+('Getas Admin', 'admin@getasrealestate.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', '+251911234567'),
+('Sales Agent',  'agent@getasrealestate.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'agent', '+251922345678');
 
--- Admin user (password: admin123)
-INSERT IGNORE INTO users (name, email, password, role, phone) VALUES
-('Getas Admin', 'admin@getasreality.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', '+251911234567'),
-('Sales Agent', 'agent@getasreality.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'agent', '+251922345678');
+-- ============================================================
+-- SEED: CITY GATE 1 APARTMENTS (Wing 1)
+-- ============================================================
+INSERT INTO properties (title, slug, description, tower, unit_type, bedrooms, bathrooms, area, price_per_m2, total_price, down_payment_10pct, status, featured, amenities) VALUES
 
--- Summit 72 Properties
-INSERT IGNORE INTO properties (title, slug, description, site, type, bedrooms, bathrooms, area, floor_number, price, status, featured, amenities, balcony, parking) VALUES
--- Summit 72 - 1 Bedroom
-('1 Bedroom Apartment – 61m² | Summit 72', 'summit-72-1br-61sqm', 'Modern 1-bedroom apartment at Summit 72, Addis Ababa's premier residential complex. Features open-plan living, fully-fitted kitchen, master bedroom with en-suite, and a private balcony with panoramic city views. High-quality finishes throughout.', 'Summit 72', '1BR', 1, 1, 61.00, 5, 2850000, 'available', 1, '["Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Concierge","Intercom","Fiber Internet"]', 1, 1),
-('1 Bedroom Apartment – 65m² | Summit 72', 'summit-72-1br-65sqm', 'Spacious 1-bedroom apartment at Summit 72 with extra living area. This premium unit features a large living room, modern kitchen, generous master bedroom with en-suite bathroom, and a wrap-around balcony offering stunning city views.', 'Summit 72', '1BR', 1, 1, 65.00, 8, 3100000, 'available', 0, '["Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Concierge","Intercom","Fiber Internet"]', 1, 1),
+('Type 1 – 2 Bedroom 115m² | City Gate 1',
+ 'cg1-type1-2br-115',
+ 'Elegant 2-bedroom apartment in City Gate 1. Features an open-plan living and dining area, two spacious bedrooms with en-suite bathrooms, a modern fully-fitted kitchen, two private balconies, maid\'s room, and laundry space. Premium finishes throughout.',
+ 'City Gate 1','Type 1',2,2,115.00,99378,11428470,1142847,'available',1,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Concierge","Fiber Internet"]'),
 
--- Summit 72 - 2 Bedroom
-('2 Bedroom Apartment – 109m² | Summit 72', 'summit-72-2br-109sqm', 'Beautiful 2-bedroom apartment at Summit 72. Perfect for families or professionals seeking spacious urban living. Features two well-proportioned bedrooms, modern bathrooms, open-plan kitchen/dining/living area, and a generous balcony.', 'Summit 72', '2BR', 2, 2, 109.00, 10, 4950000, 'available', 1, '["Elevator","24/7 Security","CCTV","Generator","2 Parking Spaces","Swimming Pool","Gym","Concierge","Intercom","Fiber Internet","Storage Room"]', 1, 2),
-('2 Bedroom Apartment – 115m² | Summit 72', 'summit-72-2br-115sqm', 'Premium 2-bedroom apartment at Summit 72 with generous floor plan. The 115m² layout provides exceptional living space with two master bedrooms each with en-suite, a large open living area, gourmet kitchen, and expansive balcony.', 'Summit 72', '2BR', 2, 2, 115.00, 12, 5200000, 'available', 1, '["Elevator","24/7 Security","CCTV","Generator","2 Parking Spaces","Swimming Pool","Gym","Concierge","Intercom","Fiber Internet","Storage Room"]', 1, 2),
+('Type 2 – 2 Bedroom 116m² | City Gate 1',
+ 'cg1-type2-2br-116',
+ 'Spacious 2-bedroom apartment in City Gate 1 with a superior floor plan. Two en-suite bedrooms, open reception rooms, gourmet kitchen, two balconies with panoramic views, dedicated maid\'s room and laundry. International-grade finishes.',
+ 'City Gate 1','Type 2',2,2,116.00,107476,12467216,1246722,'available',0,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Concierge","Fiber Internet"]'),
 
--- Summit 72 - 3 Bedroom
-('3 Bedroom Apartment – 144m² | Summit 72', 'summit-72-3br-144sqm', 'Impressive 3-bedroom apartment at Summit 72 ideal for families. Offers three spacious bedrooms with en-suite bathrooms, a grand open-plan living and dining area, chef's kitchen, utility room, and a large balcony.', 'Summit 72', '3BR', 3, 3, 144.00, 15, 6800000, 'available', 1, '["Elevator","24/7 Security","CCTV","Generator","2 Parking Spaces","Swimming Pool","Gym","Concierge","Intercom","Fiber Internet","Storage Room","Maids Room"]', 1, 2),
-('3 Bedroom Apartment – 151m² | Summit 72', 'summit-72-3br-151sqm', 'Flagship 3-bedroom apartment at Summit 72 — the largest in the series. Features three luxurious en-suite bedrooms, expansive living spaces, premium kitchen, utility room, and a spectacular corner balcony. The ultimate in urban luxury.', 'Summit 72', '3BR', 3, 3, 151.00, 18, 7200000, 'available', 0, '["Elevator","24/7 Security","CCTV","Generator","2 Parking Spaces","Swimming Pool","Gym","Concierge","Intercom","Fiber Internet","Storage Room","Maids Room","Corner Unit"]', 1, 2);
+('Type 3 – 2 Bedroom 116m² | City Gate 1',
+ 'cg1-type3-2br-116',
+ 'Premium 2-bedroom apartment in City Gate 1. Generous open-plan layout with two full en-suite bedrooms, contemporary kitchen, two private balconies overlooking the city, maid\'s room, and dedicated laundry space.',
+ 'City Gate 1','Type 3',2,2,116.00,119000,13804000,1380400,'available',1,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Concierge","Fiber Internet"]'),
 
--- Kazanchis Properties
-INSERT IGNORE INTO properties (title, slug, description, site, type, bedrooms, bathrooms, area, floor_number, price, status, featured, amenities, balcony, parking) VALUES
--- Kazanchis - 1 Bedroom
-('1 Bedroom Apartment – 61m² | Kazanchis', 'kazanchis-1br-61sqm', 'Contemporary 1-bedroom apartment in the vibrant Kazanchis business district. Steps from major offices, restaurants, and entertainment. Features modern open-plan living, fully-fitted kitchen, and private balcony.', 'Kazanchis', '1BR', 1, 1, 61.00, 4, 2700000, 'available', 0, '["Elevator","24/7 Security","CCTV","Generator","Parking","Rooftop Terrace","Concierge","Intercom","Fiber Internet"]', 1, 1),
-('1 Bedroom Apartment – 65m² | Kazanchis', 'kazanchis-1br-65sqm', 'Well-appointed 1-bedroom apartment in Kazanchis with a superior central location. Larger floor plan with extended living area, smart kitchen, generous bedroom with en-suite, and balcony overlooking the vibrant cityscape.', 'Kazanchis', '1BR', 1, 1, 65.00, 7, 2950000, 'available', 0, '["Elevator","24/7 Security","CCTV","Generator","Parking","Rooftop Terrace","Concierge","Intercom","Fiber Internet"]', 1, 1),
+('Type 4 – 3 Bedroom 137m² | City Gate 1',
+ 'cg1-type4-3br-137',
+ 'Impressive 3-bedroom apartment in City Gate 1 — ideal for families. Three en-suite bedrooms, grand open living and dining area, chef\'s kitchen, two wraparound balconies, maid\'s room and laundry. The finest quality throughout.',
+ 'City Gate 1','Type 4',3,3,137.00,119000,16303000,1630300,'available',1,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Concierge","Fiber Internet","Storage"]'),
 
--- Kazanchis - 2 Bedroom
-('2 Bedroom Apartment – 109m² | Kazanchis', 'kazanchis-2br-109sqm', 'Stylish 2-bedroom apartment in the heart of Kazanchis. Features two spacious bedrooms, modern bathrooms, bright living and dining area, fitted kitchen, and balcony. Premium finishes and access to full building amenities.', 'Kazanchis', '2BR', 2, 2, 109.00, 9, 4750000, 'available', 1, '["Elevator","24/7 Security","CCTV","Generator","2 Parking Spaces","Rooftop Terrace","Concierge","Intercom","Fiber Internet","Storage Room"]', 1, 2),
-('2 Bedroom Apartment – 115m² | Kazanchis', 'kazanchis-2br-115sqm', 'Executive 2-bedroom apartment in Kazanchis with premium finishes. The generous 115m² layout includes two en-suite bedrooms, spacious reception rooms, a well-equipped kitchen, and a sizeable private balcony.', 'Kazanchis', '2BR', 2, 2, 115.00, 11, 4950000, 'available', 0, '["Elevator","24/7 Security","CCTV","Generator","2 Parking Spaces","Rooftop Terrace","Concierge","Intercom","Fiber Internet","Storage Room"]', 1, 2),
+('Type 5 – 3 Bedroom 144m² | City Gate 1',
+ 'cg1-type5-3br-144',
+ 'Flagship 3-bedroom apartment in City Gate 1. Three luxurious en-suite bedrooms, a sweeping open-plan reception, bespoke kitchen, two balconies with skyline views, dedicated maid\'s room and laundry — the ultimate in City Gate living.',
+ 'City Gate 1','Type 5',3,3,144.00,99378,14310432,1431043,'available',1,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Concierge","Fiber Internet","Storage"]'),
 
--- Kazanchis - 3 Bedroom
-('3 Bedroom Apartment – 144m² | Kazanchis', 'kazanchis-3br-144sqm', 'Luxurious 3-bedroom apartment in Kazanchis offering sophisticated city living. Three full en-suite bedrooms, large open living spaces, premium kitchen, and a sweeping balcony with panoramic views of Addis Ababa.', 'Kazanchis', '3BR', 3, 3, 144.00, 13, 6500000, 'available', 1, '["Elevator","24/7 Security","CCTV","Generator","2 Parking Spaces","Rooftop Terrace","Concierge","Intercom","Fiber Internet","Storage Room","Maids Room"]', 1, 2),
-('3 Bedroom Apartment – 151m² | Kazanchis', 'kazanchis-3br-151sqm', 'Ultimate 3-bedroom apartment in Kazanchis — a pinnacle of luxury living. Three en-suite bedrooms, grand reception rooms, bespoke kitchen, and a wrap-around balcony capturing the full Addis Ababa skyline.', 'Kazanchis', '3BR', 3, 3, 151.00, 16, 6900000, 'available', 0, '["Elevator","24/7 Security","CCTV","Generator","2 Parking Spaces","Rooftop Terrace","Concierge","Intercom","Fiber Internet","Storage Room","Maids Room","Corner Unit"]', 1, 2);
+('Type 6 – 2 Bedroom 117m² | City Gate 1',
+ 'cg1-type6-2br-117',
+ 'Refined 2-bedroom corner apartment in City Gate 1. Generous floor plan with two en-suite bedrooms, bright living spaces, modern kitchen, two balconies capturing panoramic city views, maid\'s room and laundry.',
+ 'City Gate 1','Type 6',2,2,117.00,99378,11627226,1162723,'available',0,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Concierge","Fiber Internet"]');
 
--- Testimonials
-INSERT IGNORE INTO testimonials (name, role, message, rating, approved) VALUES
-('Abebe Girma', 'Purchased 2BR at Summit 72', 'Getas Reality made buying our apartment seamless. The team is professional, honest and very knowledgeable about the properties. We love our new home at Summit 72!', 5, 1),
-('Tigist Haile', 'Investor – Kazanchis', 'I have invested in multiple properties through Getas Reality. Their market insight and transparency are unmatched. Strong returns and excellent service every time.', 5, 1),
-('Solomon Bekele', 'Purchased 3BR at Summit 72', 'The 3-bedroom apartment at Summit 72 exceeded our expectations. Getas Reality guided us through every step with patience and expertise. Highly recommended!', 5, 1),
-('Mekdes Alemu', 'Purchased 1BR at Kazanchis', 'Perfect apartment for a young professional. The location in Kazanchis is fantastic — close to everything. Getas Reality found exactly what I needed within my budget.', 5, 1);
+-- ============================================================
+-- SEED: CITY GATE 2 APARTMENTS (Wing 2)
+-- ============================================================
+INSERT INTO properties (title, slug, description, tower, unit_type, bedrooms, bathrooms, area, price_per_m2, total_price, down_payment_10pct, status, featured, amenities) VALUES
 
--- Settings
-INSERT IGNORE INTO settings (setting_key, setting_value) VALUES
-('site_name', 'Getas Reality'),
-('tagline', 'Premium Apartments in Addis Ababa'),
-('sub_tagline', 'Summit 72 & Kazanchis — Where Luxury Meets Location'),
-('phone_1', '+251 911 234 567'),
-('phone_2', '+251 922 345 678'),
-('email', 'info@getasreality.com'),
-('address', 'Bole Road, Addis Ababa, Ethiopia'),
-('working_hours', 'Mon–Sat: 8:00 AM – 6:00 PM'),
-('facebook', 'https://facebook.com/getasreality'),
-('instagram', 'https://instagram.com/getasreality'),
-('telegram', 'https://t.me/getasreality'),
-('youtube', ''),
-('about_short', 'Getas Reality is your trusted partner for premium apartment sales in Addis Ababa. With two flagship developments — Summit 72 and Kazanchis — we offer world-class residences with Ethiopian warmth and service.'),
-('meta_description', 'Premium apartments for sale in Addis Ababa, Ethiopia. 1, 2 and 3 bedroom apartments at Summit 72 and Kazanchis. Contact Getas Reality today.');
+('Type 1 – 3 Bedroom 144m² | City Gate 2',
+ 'cg2-type1-3br-144',
+ 'Magnificent 3-bedroom apartment in City Gate 2. Three en-suite bedrooms, vast open-plan living and dining, fully fitted kitchen, two generous balconies with city panorama, maid\'s room, and laundry space.',
+ 'City Gate 2','Type 1',3,3,144.00,99378,14310432,1431043,'available',1,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet","Storage"]'),
+
+('Type 2 – 3 Bedroom 137m² | City Gate 2',
+ 'cg2-type2-3br-137',
+ 'Luxury 3-bedroom apartment in City Gate 2. Three en-suite bedrooms, large reception rooms, premium kitchen, two balconies, maid\'s room and laundry — exceptional quality in a prime location.',
+ 'City Gate 2','Type 2',3,3,137.00,119000,16303000,1630300,'available',1,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet","Storage"]'),
+
+('Type 3 – 2 Bedroom 116m² | City Gate 2',
+ 'cg2-type3-2br-116',
+ 'Stylish 2-bedroom apartment in City Gate 2. Two en-suite bedrooms, bright open-plan living and dining, modern kitchen, two balconies, maid\'s room, and laundry space. Premium finishes throughout.',
+ 'City Gate 2','Type 3',2,2,116.00,119000,13804000,1380400,'available',0,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet"]'),
+
+('Type 4 – 2 Bedroom 116m² | City Gate 2',
+ 'cg2-type4-2br-116',
+ 'Elegant 2-bedroom apartment in City Gate 2. Mirror-plan to Type 3, featuring two en-suite bedrooms, open reception, fitted kitchen, two balconies, maid\'s room, and laundry. High-specification finish.',
+ 'City Gate 2','Type 4',2,2,116.00,119000,13804000,1380400,'available',0,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet"]'),
+
+('Type 5 – 2 Bedroom 115m² | City Gate 2',
+ 'cg2-type5-2br-115',
+ 'Premium 2-bedroom apartment in City Gate 2. Two spacious en-suite bedrooms, generous open-plan living, contemporary kitchen, two balconies with skyline views, maid\'s room, and laundry space.',
+ 'City Gate 2','Type 5',2,2,115.00,119000,13685000,1368500,'available',0,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet"]'),
+
+('Type 6 – 2 Bedroom 117m² | City Gate 2',
+ 'cg2-type6-2br-117',
+ 'Contemporary 2-bedroom apartment in City Gate 2. Two en-suite bedrooms, bright living areas, fully fitted kitchen, two private balconies, maid\'s room, and laundry. Superior position within the tower.',
+ 'City Gate 2','Type 6',2,2,117.00,107476,12574692,1257469,'available',0,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet"]');
+
+-- ============================================================
+-- SEED: CITY GATE 3 APARTMENTS (Wing 3)
+-- ============================================================
+INSERT INTO properties (title, slug, description, tower, unit_type, bedrooms, bathrooms, area, price_per_m2, total_price, down_payment_10pct, status, featured, amenities) VALUES
+
+('Type 1 – 2 Bedroom 149m² | City Gate 3',
+ 'cg3-type1-2br-149',
+ 'Grand 2-bedroom apartment in City Gate 3 — the most spacious 2BR in the development. Enormous open-plan living and dining area, two en-suite master bedrooms, bespoke kitchen, two balconies, maid\'s room, and laundry space.',
+ 'City Gate 3','Type 1',2,2,149.00,107476,16013924,1601392,'available',1,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet","Storage"]'),
+
+('Type 2 – 3 Bedroom 159m² | City Gate 3',
+ 'cg3-type2-3br-159',
+ 'Pinnacle 3-bedroom apartment in City Gate 3 at 159m² — the largest available. Three luxurious en-suite bedrooms, a sweeping reception area, gourmet kitchen, two wraparound balconies, maid\'s room, and laundry. Unrivalled in City Gate.',
+ 'City Gate 3','Type 2',3,3,159.00,99378,15801102,1580110,'available',1,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet","Storage","Corner Unit"]'),
+
+('Type 3 – 2 Bedroom 132m² | City Gate 3',
+ 'cg3-type3-2br-132',
+ 'Sophisticated 2-bedroom apartment in City Gate 3. Two en-suite bedrooms, spacious open-plan living and dining, fully fitted kitchen, two balconies, maid\'s room, and laundry space. Ideal for professionals seeking premium space.',
+ 'City Gate 3','Type 3',2,2,132.00,99378,13117896,1311790,'available',0,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet"]'),
+
+('Type 4 – 2 Bedroom 132m² | City Gate 3',
+ 'cg3-type4-2br-132',
+ 'Premium 2-bedroom apartment in City Gate 3. Mirror of Type 3, offering two en-suite bedrooms, bright open reception, modern kitchen, two balconies overlooking the city, maid\'s room, and laundry.',
+ 'City Gate 3','Type 4',2,2,132.00,99378,13117896,1311790,'available',0,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet"]'),
+
+('Type 5 – 3 Bedroom 159m² | City Gate 3',
+ 'cg3-type5-3br-159',
+ 'Landmark 3-bedroom corner apartment in City Gate 3. At 159m², this unit delivers three en-suite bedrooms, a grand reception, premium kitchen, and two wrap-around balconies capturing 180° city views. The finest address in Addis Ababa.',
+ 'City Gate 3','Type 5',3,3,159.00,107476,17088684,1708868,'available',1,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet","Storage","Corner Unit"]'),
+
+('Type 6 – 2 Bedroom 149m² | City Gate 3',
+ 'cg3-type6-2br-149',
+ 'Distinguished 2-bedroom apartment in City Gate 3. Mirror-plan to Type 1 with the same generous 149m² layout: two en-suite bedrooms, expansive living spaces, bespoke kitchen, two balconies, maid\'s room, and laundry.',
+ 'City Gate 3','Type 6',2,2,149.00,107476,16013924,1601392,'available',0,
+ '["Two Balconies","Maid\'s Room","Laundry Space","Elevator","24/7 Security","CCTV","Generator","Parking","Swimming Pool","Gym","Rooftop Terrace","Concierge","Fiber Internet","Storage"]');
+
+-- ============================================================
+-- PAYMENT PLANS (completion-based pricing)
+-- ============================================================
+INSERT INTO payment_plans (plan_name, completion_pct, down_payment_pct, bedrooms, area, price_per_m2, total_price, down_payment_amount, sort_order) VALUES
+-- 100% Completed – 50% Down Payment
+('100% Completed – 50% Down',100,50,1,61.00,101379,6184119,3092060,1),
+('100% Completed – 50% Down',100,50,1,65.00,101379,6589635,3294818,2),
+('100% Completed – 50% Down',100,50,2,116.00,88672,10285952,5142976,3),
+('100% Completed – 50% Down',100,50,3,150.00,86918,13037700,6518850,4),
+
+-- 100% Completed – 65% Down Payment
+('100% Completed – 65% Down',100,65,2,109.00,88672,9665248,6282411,5),
+('100% Completed – 65% Down',100,65,2,115.00,88672,10197280,6628232,6),
+('100% Completed – 65% Down',100,65,3,144.00,86918,12516192,8135525,7),
+('100% Completed – 65% Down',100,65,3,147.00,86918,12776946,8305015,8),
+
+-- 85% Completed – 25% Down Payment
+('85% Completed – 25% Down',85,25,1,61.00,101379,6184119,1546030,9),
+('85% Completed – 25% Down',85,25,1,65.00,101379,6589635,1647409,10),
+('85% Completed – 25% Down',85,25,2,109.00,88672,9665248,2416312,11),
+('85% Completed – 25% Down',85,25,2,115.00,88672,10197280,2549320,12),
+('85% Completed – 25% Down',85,25,2,116.00,88672,10285952,2571488,13),
+('85% Completed – 25% Down',85,25,3,144.00,86918,12516192,3129048,14),
+('85% Completed – 25% Down',85,25,3,147.00,86918,12776946,3194237,15),
+('85% Completed – 25% Down',85,25,3,150.00,86918,13037700,3259425,16);
+
+-- ============================================================
+-- TESTIMONIALS
+-- ============================================================
+INSERT INTO testimonials (name, role, message, rating, approved) VALUES
+('Abebe Girma',    'Purchased 3BR Type 4 – City Gate 1',  'Getas Real Estate handled everything from start to finish. The quality of our apartment at City Gate exceeded all expectations. Highly recommend!', 5, 1),
+('Tigist Haile',   'Investor – City Gate 2',              'I have invested in two units at City Gate 2. Transparent pricing, professional service and a stunning building. Excellent investment.', 5, 1),
+('Solomon Bekele', 'Purchased 2BR – City Gate 3',         'The 149m² apartment in City Gate 3 is exceptional. The finishes are world-class and the views are breathtaking. Getas made the buying process easy.', 5, 1),
+('Mekdes Alemu',   'Purchased 2BR Type 1 – City Gate 1',  'From first enquiry to key handover, the team at Getas was professional and supportive. Our new apartment is everything we dreamed of.', 5, 1);
+
+-- ============================================================
+-- SETTINGS
+-- ============================================================
+INSERT INTO settings (setting_key, setting_value) VALUES
+('site_name',        'Getas Real Estate'),
+('project_name',     'City Gate'),
+('tagline',          'City Gate — Premium Apartments in Addis Ababa'),
+('sub_tagline',      'Three Iconic Towers. 18 Apartment Types. One Address.'),
+('phone_1',          '+251 911 234 567'),
+('phone_2',          '+251 922 345 678'),
+('email',            'info@getasrealestate.com'),
+('address',          'Addis Ababa, Ethiopia'),
+('working_hours',    'Mon–Sat: 8:00 AM – 6:00 PM'),
+('facebook',         'https://facebook.com/getasrealestate'),
+('instagram',        'https://instagram.com/getasrealestate'),
+('telegram',         'https://t.me/getasrealestate'),
+('youtube',          ''),
+('about_short',      'Getas Real Estate is the developer behind City Gate — Addis Ababa\'s most ambitious residential landmark. Three towers, 25 floors, premium 2 and 3 bedroom apartments with world-class finishes, rooftop amenities, and clear title deeds.'),
+('meta_description', 'Premium 2 and 3 bedroom apartments at City Gate by Getas Real Estate. Three towers in the heart of Addis Ababa. 10% down payment. Book your apartment today.');
