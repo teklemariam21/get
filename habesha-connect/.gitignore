@@ -1,0 +1,21 @@
+# Uploaded user files
+uploads/profiles/*
+!uploads/profiles/.gitkeep
+
+# Config with credentials (copy config.example.php to config.php)
+includes/config.local.php
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+
+# Logs
+*.log
+error_log
+
+# Composer (if added later)
+vendor/
+composer.lock

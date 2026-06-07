@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#1a6e3c"/>
+  <circle cx="100" cy="75" r="40" fill="#ffffff" opacity="0.9"/>
+  <ellipse cx="100" cy="175" rx="65" ry="45" fill="#ffffff" opacity="0.9"/>
+  <text x="100" y="83" font-family="Arial" font-size="36" fill="#1a6e3c" text-anchor="middle" dominant-baseline="middle">♂</text>
+</svg>
