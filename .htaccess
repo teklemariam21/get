@@ -1,0 +1,19 @@
+Options -Indexes
+DirectoryIndex index.php
+
+# Pretty URLs (optional)
+RewriteEngine On
+RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Protect config directory
+<FilesMatch "^\.">
+  Order allow,deny
+  Deny from all
+</FilesMatch>
+
+# Block direct access to SQL files
+<FilesMatch "\.(sql)$">
+  Order allow,deny
+  Deny from all
+</FilesMatch>
