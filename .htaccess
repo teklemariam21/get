@@ -1,0 +1,12 @@
+Options -Indexes
+
+# Protect sensitive directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+</IfModule>
+
+# Prevent direct access to config
+<FilesMatch "^db\.php$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
